@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>    
+<Employee>    
+   <emp>    
+      <id>1</id>    
+      <name>Faisal</name>    
+      <gender>Male</gender>    
+      <mobile>514545</mobile>    
+   </emp>    
+   <emp>    
+      <id>2</id>    
+      <name>Bhavdip</name>    
+      <gender>Male</gender>    
+      <mobile>5431643</mobile>    
+   </emp>   
+</Employee> 
