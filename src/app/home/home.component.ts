@@ -15,11 +15,12 @@ export class HomeComponent implements OnInit {
   nombreNuevoXML=""
   archivo:any
   subidaFinalizada=false
+  subiendoArchivo=false
   archivoseleccionado=false
   public xmlItems:any;
   public porcentaje = 0;
   constructor(private firebaseStorage: FirebaseStorageService,private http:HttpClient){ 
-    this.loadXML();
+    this.cargarXML();
   }
 
 
@@ -47,6 +48,7 @@ export class HomeComponent implements OnInit {
   }
 
   guardarXML(){
+    this.subiendoArchivo=true
     console.log("Tratando de subir...")
     let referencia = this.firebaseStorage.referenciaCloudStorage(this.nombreNuevoXML);
     let tarea = this.firebaseStorage.tareaCloudStorage(this.nombreNuevoXML, this.archivo);
@@ -56,18 +58,41 @@ export class HomeComponent implements OnInit {
       this.porcentaje = Math.round(porcentaje);
       if (this.porcentaje == 100) {
         this.subidaFinalizada = true;
-        console.log("Finalizado.")
+        this.cargarXML()
       }
     });
     
     referencia.getDownloadURL().subscribe((URL) => {
       console.log("URL: "+URL)
+      var xhr = new XMLHttpRequest();
+      xhr.responseType = 'blob';
+      xhr.onload = function(event) {
+        var blob = xhr.response;
+      };
+      xhr.open('GET', URL);
+      xhr.send();
+      this.urlPrueba
     });
+  }
+  
+  urlPrueba=""
+  
+  downloadXML() {
+    console.log("ENTRO")
+    let url="/history-xml.appspot.com/users2012020.xml"
+
+    var xhr = new XMLHttpRequest();
+    xhr.responseType = 'blob';
+    xhr.onload = function(event) {
+      var blob = xhr.response;
+    };
+    xhr.open('GET', url);
+    xhr.send();
   }
 
   //Lector de XML
-  loadXML(){
-    this.http.get('/assets/users.xml',
+  cargarXML(){
+    this.http.get(this.urlXML,
     {
       headers: new HttpHeaders().set('Content-Type','text/xml')
       .append('Access-Control-Allow-Methods','GET')
@@ -80,6 +105,7 @@ export class HomeComponent implements OnInit {
       })
     })
   }
+
   parseXML(data){
     return new Promise(resolve => {
       var k: string | number, 
