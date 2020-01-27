@@ -1,3 +1,4 @@
+<h1>Angular con Spring Boot :D</h1>
 <div class="card" style="margin-bottom: 1em;">
     <div class="card-body">
         <form class="was-validated" style="margin-bottom: 5px;">  
@@ -13,27 +14,57 @@
             <p class="text-primary" *ngIf="!subidaFinalizada">Subiendo...</p>
             <p class="text-success" *ngIf="subidaFinalizada">Archivo subido.</p>   
         </div>
-        <div class="col-md-4">
-            <a target="_blank" class="btn btn-success text-light"  (click)="downloadXML()"><i class="fas fa-download"></i> Descargar gráfica</a>
-            <a target="_blank" href="data:https://firebasestorage.googleapis.com/v0/b/history-xml.appspot.com/o/users2012020.xml?alt=media&token=d016cab4-4d6e-4ad0-93e8-aff0b9687346" >Descarga</a>
-        </div> 
     </div>
 </div>
+
 <div class="card" style="margin-bottom: 1em;">
-    <div class="card-body">
-        <table class="table table-bordered table-hover">
-            <tr>
-                <th>Id</th>
-                <th>Nombre</th>
-                <th>Ocupacion</th>
-                <th>Telefono</th>
-            </tr>
-            <tr *ngFor="let item of xmlItems">
-                <td>{{ item.id }}</td>
-                <td>{{ item.name }}</td>
-                <td>{{ item.gender }}</td>
-                <td>{{ item.mobile }}</td>
-            </tr>
-        </table>
+    <div style="margin: 1cm;">
+        <mat-form-field class="col-md-4">
+            <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Buscador">
+        </mat-form-field>
+        <div class="mat-elevation-z8">
+            <table mat-table [dataSource]="dataSource">
+        
+                <!-- nombre Column -->
+                <ng-container matColumnDef="nombre">
+                    <th mat-header-cell *matHeaderCellDef> Nombre </th>
+                    <td mat-cell *matCellDef="let element"> {{element.nombre}} </td>
+                </ng-container>
+            
+                <!-- fechaCaptura Column -->
+                <ng-container matColumnDef="fechaCaptura">
+                    <th mat-header-cell *matHeaderCellDef> Fecha de captura </th>
+                    <td mat-cell *matCellDef="let element"> {{element.fechaCaptura}} </td>
+                </ng-container>
+        
+                <!-- fechaInicial Column -->
+                <ng-container matColumnDef="fechaInicial">
+                    <th mat-header-cell *matHeaderCellDef> Fecha de inicio </th>
+                    <td mat-cell *matCellDef="let element"> {{element.fechaInicial}} </td>
+                </ng-container>
+        
+                <!-- fechaFinal Column -->
+                <ng-container matColumnDef="fechaFinal">
+                    <th mat-header-cell *matHeaderCellDef> Fecha Final </th>
+                    <td mat-cell *matCellDef="let element"> {{element.fechaFinal}} </td>
+                </ng-container>
+
+                <!-- descarga Column -->
+                <ng-container matColumnDef="urlDescarga">
+                    <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                    <td mat-cell *matCellDef="let element">
+                            <a target="_blank" (click)="downloadXML(element.urlDescarga)">
+                                <i title="Descargar" style="color:rgb(2, 182, 26);" class="material-icons btn btn-outline-light">get_app</i>
+                            </a>
+                            <i title="Eliminar" style="color:rgb(214, 25, 25);" (click)="eliminarCaptura(element.id)" class="material-icons btn btn-outline-light">delete_forever</i>
+                    </td>
+                </ng-container>
+        
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+        
+            <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+        </div>
     </div>
 </div>

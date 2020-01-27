@@ -1,7 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import xml2js from 'xml2js'
+import { ApiService } from '../services/api.service'
 import { HttpClient, HttpHeaders } from '@angular/common/http'
 import { FirebaseStorageService } from './../firebase-storage.service';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-home',
@@ -9,6 +12,16 @@ import { FirebaseStorageService } from './../firebase-storage.service';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
+  ELEMENT_DATA:any
+  displayedColumns: string[] = ['nombre', 'fechaCaptura' , 'fechaInicial' , 'fechaFinal' , 'urlDescarga'];
+  dataSource: MatTableDataSource<PeriodicElement>;
+
+  @ViewChild(MatPaginator, {static: true}) paginator: MatPaginator;
+
+  applyFilter(filterValue: string) {
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+  }
+
   title = 'historyXML';
   urlXML:string
   nombreXML="No se seleccionado ningun archivo"
@@ -19,13 +32,33 @@ export class HomeComponent implements OnInit {
   archivoseleccionado=false
   public xmlItems:any;
   public porcentaje = 0;
-  constructor(private firebaseStorage: FirebaseStorageService,private http:HttpClient){ 
-    this.cargarXML();
+  dataCapturas: PeriodicElement[]=[];
+  constructor(private firebaseStorage: FirebaseStorageService,private http:HttpClient, private api: ApiService){
+    this.verCapturas()
+    this.cargarXML()
   }
 
 
   ngOnInit() {
+    this.dataSource.paginator = this.paginator;
   }
+
+  verCapturas(){
+    this.api.verCapturas().subscribe((response) => {
+      console.log(response)
+      this.dataSource = new MatTableDataSource(response);
+     })
+  }
+
+  eliminarCaptura(id){
+    console.log(id)
+    this.api.eliminarCaptura(id).subscribe((response) => {
+      console.log(response)
+      this.verCapturas()
+      this.ngOnInit()
+     })
+  }
+
   subirXML(e){
     this.urlXML = e.target.value;
     this.nombreXML="No se seleccionado ningun archivo"
@@ -34,8 +67,12 @@ export class HomeComponent implements OnInit {
       this.nombreXML = e.target.files[0].name
       this.archivo = e.target.files[0]
       console.log(e.target.files[0])
-  
-      let fecha= new Date()
+      
+      this.api.subirArchivo(this.archivo).subscribe((response) => {
+        console.log(response)
+       })
+       
+      /*let fecha= new Date()
       let year =fecha.getFullYear()
       let month = fecha.getMonth()+1
       let day = fecha.getDate()
@@ -43,7 +80,7 @@ export class HomeComponent implements OnInit {
         this.nombreNuevoXML=this.nombreXML.split(".")[0]+"0"+day+month+year+".xml"
       }
       this.nombreNuevoXML=this.nombreXML.split(".")[0]+day+month+year+".xml"
-      this.archivoseleccionado=true
+      this.archivoseleccionado=true*/
     }
   }
 
@@ -53,7 +90,6 @@ export class HomeComponent implements OnInit {
     let referencia = this.firebaseStorage.referenciaCloudStorage(this.nombreNuevoXML);
     let tarea = this.firebaseStorage.tareaCloudStorage(this.nombreNuevoXML, this.archivo);
     
-    //Cambia el porcentaje
     tarea.percentageChanges().subscribe((porcentaje) => {
       this.porcentaje = Math.round(porcentaje);
       if (this.porcentaje == 100) {
@@ -77,10 +113,7 @@ export class HomeComponent implements OnInit {
   
   urlPrueba=""
   
-  downloadXML() {
-    console.log("ENTRO")
-    let url="/history-xml.appspot.com/users2012020.xml"
-
+  downloadXML(url) {
     var xhr = new XMLHttpRequest();
     xhr.responseType = 'blob';
     xhr.onload = function(event) {
@@ -130,3 +163,11 @@ export class HomeComponent implements OnInit {
     })
   }
 }
+
+  export interface PeriodicElement {
+    nombre: string;
+    fechaCaptura: string;
+    fechaInicial: string;
+    fechaFinal: string;
+    urlDescarga:string;
+  }
