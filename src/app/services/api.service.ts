@@ -22,9 +22,11 @@ export class ApiService {
     return this.http.delete(this.url + 'archivos/'+id);
   }
 
-  subirArchivo(archivo){
+  subirArchivo(archivo,nombre,fechaCaptura){
     var params = new FormData();
     params.append('file', archivo);
+    params.append('nombre', nombre);
+    params.append('fechaCaptura', fechaCaptura);
     return this.http.post(this.url+'archivos/subir',params)
   }
 }
