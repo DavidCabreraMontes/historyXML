@@ -118,6 +118,9 @@ export class HomeComponent implements OnInit {
     },err => {
       console.log("Error: ",err)
       this.subidaError=true
+      this.subidaFinalizada=false
+      this.subiendo=false
+      this.mensajeError="Error!! Cambie el nombre del archivo."
     })
   }
 }
